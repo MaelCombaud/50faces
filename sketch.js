@@ -6,6 +6,7 @@ const CONFIG = {
   canvasHeight: 700,
   gridSize: 7,           // 7x7 = 49 dessins
   drawingSize: 70,
+  minDrawingSize: 28,
   speed: 0.5,              // pixels par frame
   canvasId: 'gameCanvas',
   targetNameId: 'targetName',
@@ -72,7 +73,9 @@ class Drawing {
   constructor(id, name, col, row) {
     this.id = id;
     this.name = name;
-    // Position centrée dans chaque cellule de grille
+    this.col = col;
+    this.row = row;
+    // Position centrée dans chaque cellule de grille (sera recalculée au resize)
     this.x = col * (CONFIG.canvasWidth / CONFIG.gridSize) + 
              (CONFIG.canvasWidth / CONFIG.gridSize - CONFIG.drawingSize) / 2;
     this.y = row * (CONFIG.canvasHeight / CONFIG.gridSize) + 
@@ -127,6 +130,28 @@ class Drawing {
   }
 }
 
+// Helper: redimensionne le canvas en fonction du conteneur et du devicePixelRatio
+function resizeCanvasToDisplaySize(canvas, manager) {
+  const dpr = window.devicePixelRatio || 1;
+  const parentRect = canvas.parentElement ? canvas.parentElement.getBoundingClientRect() : canvas.getBoundingClientRect();
+  // Utilise une taille carrée qui ne dépasse jamais les dimensions du support
+  const maxSize = Math.floor(Math.min(parentRect.width, parentRect.height || parentRect.width));
+  const displaySize = Math.max(100, maxSize);
+  if (canvas.width !== Math.floor(displaySize * dpr) || canvas.height !== Math.floor(displaySize * dpr)) {
+    canvas.width = Math.floor(displaySize * dpr);
+    canvas.height = Math.floor(displaySize * dpr);
+    canvas.style.width = displaySize + 'px';
+    canvas.style.height = displaySize + 'px';
+    const ctx = canvas.getContext('2d');
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // Update logical sizes (en CSS pixels)
+    CONFIG.canvasWidth = displaySize;
+    CONFIG.canvasHeight = displaySize;
+    CONFIG.drawingSize = Math.max(CONFIG.minDrawingSize, Math.round(displaySize / CONFIG.gridSize * 0.85));
+    if (manager && typeof manager._repositionDrawings === 'function') manager._repositionDrawings();
+  }
+}
+
 // ============================================================================
 // CLASSE GameManager : Gère la logique du jeu
 // ============================================================================
@@ -146,7 +171,11 @@ class GameManager {
     this.audio = new Audio('Assets/wanted-minigame.mp3'); 
     this.audio.loop = true;
 
+    // Responsive setup
+    this._applyResponsiveSizing();
+
     this._initializeDrawings();
+    this._repositionDrawings();
     this._selectRandomTarget();
     this._setupEventListeners();
     this._startGameLoop();
@@ -181,6 +210,26 @@ class GameManager {
    */
   _setupEventListeners() {
     this.canvas.addEventListener('click', (e) => this._handleCanvasClick(e));
+  }
+
+  _applyResponsiveSizing() {
+    // initial resize
+    resizeCanvasToDisplaySize(this.canvas, this);
+    // Debounced resize handler
+    let timeout;
+    window.addEventListener('resize', () => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => resizeCanvasToDisplaySize(this.canvas, this), 150);
+    });
+  }
+
+  _repositionDrawings() {
+    for (let drawing of this.drawings) {
+      const col = drawing.col;
+      const row = drawing.row;
+      drawing.x = col * (CONFIG.canvasWidth / CONFIG.gridSize) + (CONFIG.canvasWidth / CONFIG.gridSize - CONFIG.drawingSize) / 2;
+      drawing.y = row * (CONFIG.canvasHeight / CONFIG.gridSize) + (CONFIG.canvasHeight / CONFIG.gridSize - CONFIG.drawingSize) / 2;
+    }
   }
 
   /**

@@ -2,10 +2,16 @@
 <html>
 
 <head>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <style>
     @font-face {
       font-family: 'Autremainel-Regular';
       src: url('Assets/Autremainel-Regular.otf') format('opentype');
+    }
+
+    html, body {
+      height: 100%;
+      min-height: 100vh;
     }
 
     body {
@@ -14,19 +20,21 @@
       padding: 20px;
       background-image: url('Assets/Fond.jpg');
       background-size: cover;
-      background-position: center;
+      background-position: center center;
       background-repeat: no-repeat;
       background-attachment: fixed;
+      background-color: #000; /* fallback color when aspect ratios differ */
       font-family: 'Autremainel-Regular',
         sans-serif;
       cursor: none;
+      box-sizing: border-box;
     }
 
     #custom-cursor {
       position: fixed;
       left: 0;
       top: 0;
-      width: 60px;
+      width: 30px;
       /* Adjust size as needed */
       z-index: 10000;
       pointer-events: none;
@@ -41,11 +49,23 @@
 
     #right-panel {
       flex: 0 0 auto;
+      max-width: 700px; /* limite maximum sur grands écrans */
+      width: 100%; /* s'adapte au conteneur */
+      overflow: hidden; /* évite tout débordement visuel */
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
 
     canvas {
       border: 6px solid rgb(0, 0, 0);
       background: #e7e7e7;
+      width: 100%;       /* occupe la largeur du support */
+      height: auto;      /* conserve le ratio 1:1 via JS */
+      max-width: 100%;
+      aspect-ratio: 1 / 1;
+      display: block;
+      box-sizing: border-box;
     }
 
     #targetName {
@@ -83,6 +103,7 @@
         align-items: center;
         justify-content: flex-start;
         padding: 16px;
+        background-attachment: scroll;
       }
 
       #custom-cursor {
@@ -127,6 +148,33 @@
         display: none;
       }
     }
+
+    /* Très petits écrans (téléphones) */
+    @media (max-width: 420px) {
+      h1 {
+        font-size: 28px;
+      }
+
+      #targetName {
+        font-size: 28px;
+      }
+
+      #left-panel>div:last-child {
+        font-size: 18px;
+      }
+
+      canvas {
+        width: 92vw;
+        max-width: none;
+      }
+
+      body {
+        padding: 10px;
+        background-size: contain;
+        background-position: top center;
+        background-repeat: no-repeat;
+      }
+    }
   </style>
 </head>
 
@@ -139,7 +187,7 @@
     <div>Score: <span id="score">0</span> | Erreurs: <span id="errors">0</span></div>
   </div>
   <div id="right-panel">
-    <canvas id="gameCanvas" width="700" height="700"></canvas>
+    <canvas id="gameCanvas"></canvas>
   </div>
 
   <script src="sketch.js"></script>
