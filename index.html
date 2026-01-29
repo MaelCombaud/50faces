@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <style>
+    @font-face {
+      font-family: 'Autremainel-Regular';
+      src: url('Assets/Autremainel-Regular.otf') format('opentype');
+    }
+
+    body {
+      display: flex;
+      justify-content: space-between;
+      padding: 20px;
+      background-image: url('Assets/Fond.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      font-family: 'Autremainel-Regular',
+        sans-serif;
+      cursor: none;
+    }
+
+    #custom-cursor {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 60px;
+      /* Adjust size as needed */
+      z-index: 10000;
+      pointer-events: none;
+      transform: translate(-50%, -50%) rotate(0deg);
+      transform-origin: center;
+    }
+
+    #left-panel {
+      flex: 1;
+      text-align: left;
+    }
+
+    #right-panel {
+      flex: 0 0 auto;
+    }
+
+    canvas {
+      border: 6px solid rgb(0, 0, 0);
+      background: #e7e7e7;
+    }
+
+    #targetName {
+      font-size: 64px;
+      color: #000000;
+      margin: 48px 0;
+    }
+
+    h1 {
+      font-size: 60px;
+    }
+
+    #left-panel>div:last-child {
+      font-size: 48px;
+      font-weight: bold;
+    }
+
+    .feedback {
+      font-size: 24px;
+      margin: 10px 0;
+    }
+
+    canvas.correct-shadow {
+      box-shadow: 0 0 20px green;
+    }
+
+    canvas.incorrect-shadow {
+      box-shadow: 0 0 20px red;
+    }
+  </style>
+</head>
+
+<body>
+  <img id="custom-cursor" src="Assets/Curseur.png" alt="Custom Cursor">
+  <div id="left-panel">
+    <h1 style="color: #000000;">Trouve le dessin de</h1>
+    <div id="targetName"></div>
+    <div id="feedback"></div>
+    <div>Score: <span id="score">0</span> | Erreurs: <span id="errors">0</span></div>
+  </div>
+  <div id="right-panel">
+    <canvas id="gameCanvas" width="700" height="700"></canvas>
+  </div>
+
+  <script src="sketch.js"></script>
+  <script>
+    const cursor = document.getElementById('custom-cursor');
+    document.addEventListener('mousemove', (e) => {
+      cursor.style.left = e.clientX + 'px';
+      cursor.style.top = e.clientY + 'px';
+    });
+  </script>
+</body>
+
+</html>
